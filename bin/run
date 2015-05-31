@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby 
+#chmod +x bin/cli
+require 'benchmark'
+require_relative '../config/environment'
+
+time = Benchmark.realtime{MovieScrape.new.call}
+puts "Time elapsed #{time.round(2)} seconds"
+
