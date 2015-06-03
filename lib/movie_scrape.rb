@@ -7,7 +7,6 @@ class MovieScrape
 
   def call
     create_movie_objects
-    # Movie.price_converter
     Movie.movies_detail
     Movie.average_budget
   end
@@ -40,21 +39,9 @@ class MovieScrape
     if movie_box.at('th:contains("Budget")')
       budget = movie_box.search("[text()*='Budget']").last.next_element.text.gsub("US", "").gsub("\n","").gsub("$","").gsub(/\(.*?\)/, '')
     else
-      budget = "0"
+      budget = "N/A"
     end
     budget = final_budget_filter(budget)
-    if budget.include?("million")
-        budget = (budget.gsub("million", "").to_f * 1_000_000)
-    elsif budget.include?("billion")
-        budget = (budget.gsub("billion", "").to_f * 1_000_000_000)
-    elsif budget.include?(",") && budget.include?("£")
-        budget = (budget.gsub("£", "").gsub(",","").to_f * 1.53)
-    elsif budget.include?(",")       
-        budget = (budget.gsub(",","")).to_f
-    else
-        budget = budget.to_f
-    end
-    budget
   end
 
   def find_box(movie_index)
@@ -63,5 +50,21 @@ class MovieScrape
 
   def final_budget_filter(budget)
     budget.include?("[") ?  budget = budget.slice(0...(budget.index('['))) : budget
+    budget.include?("(") ?  budget = budget.slice(0...(budget.index('('))) : budget
+
+    if budget.include?("£") && budget.include?("million")
+      budget = (budget.gsub("£", "").gsub(",","").to_f * 1.53) * 1_000_000
+    elsif budget.include?("£") && budget.include?(",")
+      budget = (budget.gsub("£", "").gsub(",","").to_f * 1.53)
+    elsif budget.include?("million")
+      budget = (budget.gsub("million", "").to_f * 1_000_000)
+    elsif budget.include?("billion")
+      budget = (budget.gsub("billion", "").to_f * 1_000_000_000)
+    elsif budget.include?(",")       
+      budget = (budget.gsub(",","")).to_f
+    else
+      budget = budget.to_f unless budget == "N/A"
+    end
+    budget
   end
 end

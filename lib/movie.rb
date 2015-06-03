@@ -15,7 +15,7 @@ class Movie
   end
 
   def self.no_budget
-    self.all.select { |movie| movie.budget == 0}.count
+    self.all.select { |movie| movie.budget == "N/A"}.count
   end
 
   def self.true_count
@@ -30,7 +30,7 @@ class Movie
   end
 
   def self.average_budget
-    sum = self.all.collect {|movie| movie.budget}.inject(:+)
+    sum = self.all.collect {|movie| movie.budget}.grep(Float).inject(:+)
     puts "Average Budget: #{(sum / (self.true_count) / 1_000_000).round(2)} million"
   end
 end
