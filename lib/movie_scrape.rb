@@ -7,7 +7,7 @@ class MovieScrape
 
   def call
     create_movie_objects
-    Movie.price_converter
+    # Movie.price_converter
     Movie.movies_detail
     Movie.average_budget
   end
@@ -43,6 +43,18 @@ class MovieScrape
       budget = "0"
     end
     budget = final_budget_filter(budget)
+    if budget.include?("million")
+        budget = (budget.gsub("million", "").to_f * 1_000_000)
+    elsif budget.include?("billion")
+        budget = (budget.gsub("billion", "").to_f * 1_000_000_000)
+    elsif budget.include?(",") && budget.include?("£")
+        budget = (budget.gsub("£", "").gsub(",","").to_f * 1.53)
+    elsif budget.include?(",")       
+        budget = (budget.gsub(",","")).to_f
+    else
+        budget = budget.to_f
+    end
+    budget
   end
 
   def find_box(movie_index)
@@ -53,47 +65,3 @@ class MovieScrape
     budget.include?("[") ?  budget = budget.slice(0...(budget.index('['))) : budget
   end
 end
-
-  # def filter_release_date(movie_box)
-  #   if movie_box.at('th:contains("Release dates")')
-  #     release_date = movie_box.search("[text()*='Release dates']").last.next_element
-  #     binding.pry
-  #   end
-  # end
-
-  # def categorize_elements(tr, i)
-  #   if tr.children[1].text == "Budget" 
-  #       {"Budget" => i}
-  #   elsif tr.children[1].text.gsub("\n","") == "Release dates"
-  #       {tr.children[1].text.gsub("\n","") => i}
-  #   end
-  # end
-
-  # def initial_date_filter(movie_box, elements)
-  #   movie_box[elements.first["Release dates"]].search('td ul li').empty? ? movie_box[elements.first["Release dates"]].search('td').first.children.text.gsub(/\(.*?\)/, '').gsub("\n","") : movie_box[elements.first["Release dates"]].search('td ul li').first.text.gsub(/\(.*?\)/, '')
-  # end
-
-  # def final_date_filter(release_date)
-  #   release_date.include?("(") ?  date_filter(release_date.slice(0...(release_date.index('(')))) : date_filter(release_date)
-  # end
-
-  # def date_filter(date)
-  #   Date.parse(date).year
-  # end
-
-  # def filter_and_create(movie_box, title, elements)
-  #   if movie_box.at('th:contains("Budget")')
-  #     budget = movie_box[elements.last["Budget"]].search('td').first.children.text.gsub("US", "").gsub("\n","").gsub("$","").gsub(/\(.*?\)/, '')
-  #     release_date = initial_date_filter(movie_box, elements)
-  #   else
-  #     # 0 indicates no data
-  #     budget = '0'
-  #     release_date = initial_date_filter(movie_box, elements)
-  #   end    
-  #   release_date = final_date_filter(release_date)
-  #   budget = final_budget_filter(budget)
-  #   Movie.new(title, budget, release_date)
-  # end
-
-
-
